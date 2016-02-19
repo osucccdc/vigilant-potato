@@ -1,0 +1,156 @@
+@echo off
+TITLE NETSTAT UTILITY
+color 02
+::
+:START
+mode con:cols=95 lines=25
+cls
+echo.
+echo _______________________________________________________________________________________________
+echo                                      NETSTAT BATCH UTILITY                                            
+echo _______________________________________________________________________________________________
+echo.
+echo                           Please select the task you want to perform:                                               
+echo.                                                                                                                                      
+echo                                      Routing Tables:      (R)                                                           
+echo                                      Interface Stats:     (S)                                                     
+echo                                      TCP/UDP/ALL Ports:   (P)                                                          
+echo                                      Quit:                (Q)                                                                                             
+echo _______________________________________________________________________________________________
+echo.
+set SEL=
+set  /P SEL= "Make a Selection and Press Enter: "
+echo.
+::
+IF NOT DEFINED SEL goto START
+IF /I "%SEL%"=="R" goto ROUTE
+IF /I "%SEL%"=="S" goto STATS
+IF /I "%SEL%"=="P" goto PORTS
+IF /I "%SEL%"=="Q" goto QUIT
+IF "%ERRORLEVEL%"=="0"  goto START
+::
+:ROUTE
+cls
+mode con:cols=76 lines=60
+netstat -r
+ping -n 3 127.0.0.1>nul
+echo.
+pause
+goto START
+::
+:STATS
+cls
+mode con:cols=76 lines=127
+netstat -e -s
+ping -n 3 127.0.0.1>nul
+echo.
+pause
+goto START
+::
+:PORTS
+cls
+mode con:cols=70 lines=20
+echo.
+echo ______________________________________________________________________
+echo                        Choose TCP, UDP, or ALL Ports            
+echo ______________________________________________________________________
+echo                            TCP Ports: (T) 
+echo.
+echo                            UDP Ports: (U)
+echo.
+echo                            ALL Ports: (A)
+echo.                             
+echo                            Main Menu: (M)
+echo ______________________________________________________________________
+echo.          
+set /P PORT=Make a Selection and Press Enter:
+IF NOT DEFINED PORT goto PORTS
+IF /I "%PORT%"=="T" goto SUB1
+IF /I "%PORT%"=="U" goto SUB2
+IF /I "%PORT%"=="A" goto SUB3
+IF /I "%PORT%"=="M" goto START
+IF "%ERRORLEVEL%"=="0"  goto PORTS
+IF "%ERRORLEVEL%"=="1"  goto PORTS
+::
+:SUB1
+cls
+mode con:cols=80 lines=127
+netstat -a -p TCP -o
+echo.
+:PASK
+set /P TL= "Please enter a PID to check: "
+IF NOT DEFINED TL goto PASK
+tasklist /FI "PID eq %TL%"
+IF "%ERRORLEVEL%"=="1"  goto PASK
+set TL=
+echo.
+echo.
+set /P AGAIN= "Would you like to check another PID (Y/N)? "
+IF NOT DEFINED AGAIN goto PASK
+IF /I "%AGAIN%"=="Y" goto PASK
+IF /I "%AGAIN%"=="N" goto PORTS
+IF "%ERRORLEVEL%"=="1"  goto PASK
+echo.
+::
+:SUB2
+cls
+mode con:cols=80 lines=127
+netstat -a -p UDP -o
+echo.
+:PASK2
+set /P TL2= "Please enter a PID to check: "
+IF NOT DEFINED TL2 goto PASK2
+tasklist /FI "PID eq %TL2%"
+IF "%ERRORLEVEL%"=="1"  goto PASK2
+set TL2=
+echo.
+echo.
+set /P AGAIN2= "Would you like to check another PID (Y/N)? "
+IF NOT DEFINED AGAIN2 goto PASK2
+IF /I "%AGAIN2%"=="Y" goto PASK2
+IF /I "%AGAIN2%"=="N" goto PORTS
+IF "%ERRORLEVEL%"=="1"  goto PASK2
+echo.
+::
+:SUB3
+cls
+mode con:cols=80 lines=150
+netstat -a -o
+echo.
+:PASK3
+set /P TL3= "Please enter a PID to check: "
+IF NOT DEFINED TL3 goto PASK3
+tasklist /FI "PID eq %TL3%"
+IF "%ERRORLEVEL%"=="1"  goto PASK3
+set TL3=
+echo.
+echo.
+set /P AGAIN3= "Would you like to check another PID (Y/N)? "
+IF NOT DEFINED AGAIN3 goto PASK3
+IF /I "%AGAIN3%"=="Y" goto PASK3
+IF /I "%AGAIN3%"=="N" goto PORTS
+IF "%ERRORLEVEL%"=="1"  goto PASK3
+echo.
+::
+:QUIT
+cls
+echo.
+echo.
+echo                                        Exiting Batch Program
+ping -n 2 127.0.0.1>nul
+exit
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
