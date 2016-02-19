@@ -1,0 +1,54 @@
+#!/bin/bash
+
+echo "By 9H4C7K3R2 - v1.0"
+echo "@ Script allowing you to scan and detect if a device connects/disconnects from your network"
+echo
+echo "[+] Starting script (CTRL+C to stop)"
+echo "[+] Available interfaces"
+ifconfig -a | sed 's/[ \t].*//;/^\(lo\|\)$/d'
+echo -n "[+] Which interface do you want to use ? "
+read interface
+echo -n "[+] Set the time between each scan (default is 10 sec): "
+read pause
+
+if [[ $pause == "" ]]
+then
+    pause=10
+    echo "[+] Scan every: $pause secondes"
+else
+    echo "[+] Scan every: $pause secondes"
+fi
+
+range=$(ifconfig $interface | grep -E 'inet addr:' | sed -re 's/inet\ addr\:([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})//g;s/Bcast\://g;s/Mask\:([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})//g' | sed -e 's/255/0\-255/g' | sed -e 's/^[ \a]*//')
+
+if [[ -z ${range} ]]
+then
+        range=$(ifconfig $interface | grep -E 'inet adr:' | sed -re 's/inet\ adr\:([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})//g;s/Bcast\://g;s/Masque\:([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})//g' | sed -e 's/255/0\-255/g' | sed -e 's/^[ \a]*//')
+fi
+
+while [ 1 ];
+do
+    nmap -sP $range > .host.save
+    cat .host.save | sed -e 's/Starting.*//' | sed -e 's/Host.*//' | sed -e 's/Nmap\ done.*//' | sed -e 's/Nmap\ scan\ report\ for\ //' | sed '/^$/d' > .host.save
+
+        echo "[+] Next scan in $pause sec"
+        sleep $pause
+
+    nmap -sP $range > .host.bis.save
+    cat .host.bis.save | sed -e 's/Starting.*//' | sed -e 's/Host.*//' | sed -e 's/Nmap\ done.*//' | sed -e 's/Nmap\ scan\ report\ for\ //' | sed '/^$/d' > .host.bis.save
+
+    diff .host.save .host.bis.save > .result
+
+    if [ -e .result ];
+        then
+                if [ ! -s .result ]
+                then
+                        echo "[+] Nothing Detected"
+            rm .host.save .host.bis.save
+                else
+            echo "[+] Modification Detected"
+            cat .result | sed '1d'
+            rm .host.save .host.bis.save
+                fi
+        fi
+done
